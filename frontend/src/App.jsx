@@ -8,6 +8,63 @@ elementTypes.forEach(registerElementType);
 
 const API_BASE = 'http://localhost:8000/api';
 
+const mapMediaResponseToResource = (item) => {
+  if (!item) return null;
+  const mimeType = item.mime_type || item.mimeType || '';
+  let type = 'image';
+  if (mimeType.startsWith('image/')) {
+    type = mimeType === 'image/gif' ? 'gif' : 'image';
+  } else if (mimeType.startsWith('video/')) {
+    type = 'video';
+  }
+
+  const width = Number(item.media_details?.width || item.width || 1080);
+  const height = Number(item.media_details?.height || item.height || 1920);
+  const src = item.source_url || item.src || '';
+  const alt = item.alt_text || item.alt || '';
+
+  const baseColor = item.meta?.web_stories_base_color || item.baseColor;
+  const blurHash = item.meta?.web_stories_blurhash || item.blurHash;
+
+  const fullSize = {
+    file: item.id,
+    width,
+    height,
+    mimeType,
+    sourceUrl: src,
+  };
+
+  const sizes = {
+    thumbnail: fullSize,
+    medium: fullSize,
+    large: fullSize,
+    full: fullSize,
+    ...item.media_details?.sizes,
+    ...item.sizes,
+  };
+
+  const resource = {
+    id: String(item.id),
+    type,
+    mimeType,
+    src,
+    width,
+    height,
+    alt,
+    baseColor,
+    blurHash,
+    sizes,
+  };
+
+  if (type === 'video') {
+    resource.poster = item.media_details?.poster || item.poster || '';
+    resource.length = Number(item.media_details?.length || item.length || 0);
+    resource.lengthFormatted = item.media_details?.length_formatted || item.lengthFormatted || '0:00';
+  }
+
+  return resource;
+};
+
 export default function App() {
   const [stories, setStories] = useState([]);
   const [activeStoryId, setActiveStoryId] = useState(null);
@@ -102,7 +159,7 @@ export default function App() {
       const data = await res.json();
 
       return {
-        data: data.items,
+        data: (data.items || []).map(mapMediaResponseToResource),
         headers: {
           totalItems: data.totalItems,
           totalPages: data.totalPages,
@@ -126,7 +183,8 @@ export default function App() {
       });
 
       if (!res.ok) throw new Error('Failed to upload media');
-      return res.json();
+      const uploadedData = await res.json();
+      return mapMediaResponseToResource(uploadedData);
     }, []),
 
     // 5. Delete media
