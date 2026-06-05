@@ -105,11 +105,7 @@ export default function App() {
         title: { raw: data.title },
         slug: data.slug,
         status: data.status,
-        pages: data.storyData.pages || [],
-        fonts: data.storyData.fonts || [],
-        autoAdvance: data.storyData.autoAdvance,
-        defaultPageDuration: data.storyData.defaultPageDuration,
-        backgroundAudio: data.storyData.backgroundAudio,
+        storyData: data.storyData,
       };
     }, []),
 
@@ -206,7 +202,7 @@ export default function App() {
   };
 
   // Custom File Uploader logic mapped to editor trigger
-  const CustomMediaUpload = ({ render, onSelect, type }) => {
+  const CustomMediaUpload = ({ render, onSelect, onClose, type }) => {
     const handlePicker = useCallback(() => {
       const input = document.createElement('input');
       input.type = 'file';
@@ -217,13 +213,16 @@ export default function App() {
           try {
             const uploadedResource = await apiCallbacks.uploadMedia({}, file, {});
             onSelect(uploadedResource);
+            if (onClose) {
+              onClose();
+            }
           } catch (err) {
             console.error('Upload failed:', err);
           }
         }
       };
       input.click();
-    }, [type, onSelect]);
+    }, [type, onSelect, onClose]);
 
     return render(handlePicker);
   };
@@ -243,11 +242,7 @@ export default function App() {
             title: { raw: data.title },
             slug: data.slug,
             status: data.status,
-            pages: data.storyData.pages || [],
-            fonts: data.storyData.fonts || [],
-            autoAdvance: data.storyData.autoAdvance,
-            defaultPageDuration: data.storyData.defaultPageDuration,
-            backgroundAudio: data.storyData.backgroundAudio,
+            storyData: data.storyData,
           }
         });
         setActiveStoryId(storyId);
@@ -317,9 +312,11 @@ export default function App() {
 
   // Back to Dashboard callback
   const handleCloseEditor = () => {
-    setActiveStoryId(null);
-    setInitialStoryData(null);
-    fetchStories();
+    if (confirm('Are you sure you want to exit the editor? Unsaved changes may be lost. Make sure to click Save Draft or Publish before exiting.')) {
+      setActiveStoryId(null);
+      setInitialStoryData(null);
+      fetchStories();
+    }
   };
 
   const editorConfig = {
