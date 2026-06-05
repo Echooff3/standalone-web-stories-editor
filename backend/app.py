@@ -64,7 +64,7 @@ def startup_event():
     except Exception:
         # If container already exists, ensure public access is set
         try:
-            assets_container_client.set_container_access_policy(signed_identifiers=None, public_access="blob")
+            assets_container_client.set_container_access_policy(signed_identifiers={}, public_access="blob")
         except Exception:
             pass
     try:
@@ -72,7 +72,7 @@ def startup_event():
     except Exception:
         # If container already exists, ensure public access is set
         try:
-            published_container_client.set_container_access_policy(signed_identifiers=None, public_access="blob")
+            published_container_client.set_container_access_policy(signed_identifiers={}, public_access="blob")
         except Exception:
             pass
 
