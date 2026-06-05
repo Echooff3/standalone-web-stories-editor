@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from azure.data.tables import TableServiceClient, TableClient
-from azure.storage.blob import BlobServiceClient
+from azure.storage.blob import BlobServiceClient, CorsRule
 
 app = FastAPI(title="Standalone Web Stories CMS")
 
@@ -35,6 +35,19 @@ published_container_client = blob_service_client.get_container_client("published
 
 @app.on_event("startup")
 def startup_event():
+    # Set CORS policy on the blob service level for Azurite emulator
+    try:
+        cors_rule = CorsRule(
+            allowed_origins=["*"],
+            allowed_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"],
+            allowed_headers=["*"],
+            exposed_headers=["*"],
+            max_age_in_seconds=3600
+        )
+        blob_service_client.set_service_properties(cors=[cors_rule])
+    except Exception as e:
+        print(f"Warning: Failed to set service CORS properties: {e}")
+
     # Create tables
     try:
         table_service_client.create_table("Stories")
@@ -45,15 +58,23 @@ def startup_event():
     except Exception:
         pass  # Already exists
 
-    # Create blob containers
+    # Create blob containers with public blob access
     try:
-        assets_container_client.create_container()
+        assets_container_client.create_container(public_access="blob")
     except Exception:
-        pass
+        # If container already exists, ensure public access is set
+        try:
+            assets_container_client.set_container_access_policy(signed_identifiers=None, public_access="blob")
+        except Exception:
+            pass
     try:
-        published_container_client.create_container()
+        published_container_client.create_container(public_access="blob")
     except Exception:
-        pass
+        # If container already exists, ensure public access is set
+        try:
+            published_container_client.set_container_access_policy(signed_identifiers=None, public_access="blob")
+        except Exception:
+            pass
 
 # --- Data Models ---
 class StorySavePayload(BaseModel):
