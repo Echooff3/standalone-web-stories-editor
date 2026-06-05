@@ -1,0 +1,26 @@
+{
+  "name": "web-stories-standalone-frontend",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@googleforcreators/design-system": "^0.1.2",
+    "@googleforcreators/element-library": "^0.1.2",
+    "@googleforcreators/elements": "^0.1.2",
+    "@googleforcreators/react": "^0.1.2",
+    "@googleforcreators/story-editor": "^0.1.2",
+    "react": "17.0.2",
+    "react-dom": "17.0.2",
+    "styled-components": "^5.3.11"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.2.1",
+    "azurite": "^3.30.0",
+    "vite": "^5.1.4"
+  }
+}

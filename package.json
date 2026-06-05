@@ -1,0 +1,13 @@
+{
+  "name": "standalone-web-stories-workspace",
+  "private": true,
+  "scripts": {
+    "azurite": "mkdir -p azurite_data && bunx azurite --silent --skipApiVersionCheck --location ./azurite_data --debug ./azurite_data/debug.log",
+    "backend": "./venv/bin/uvicorn backend.app:app --reload --port 8000",
+    "frontend": "bun --cwd frontend dev",
+    "dev": "bunx concurrently \"bun run azurite\" \"bun run backend\" \"bun run frontend\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
