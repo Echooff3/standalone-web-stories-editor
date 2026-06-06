@@ -95,7 +95,7 @@ export default function App() {
   // API Callbacks for the Story Editor configuration
   const apiCallbacks = {
     // 1. Get Story
-    getStoryById: useCallback(async (config, storyId) => {
+    getStoryById: useCallback(async (storyId) => {
       const res = await fetch(`${API_BASE}/stories/${storyId}`);
       if (!res.ok) throw new Error('Failed to load story');
       const data = await res.json();
@@ -114,7 +114,7 @@ export default function App() {
     }, []),
 
     // 2. Save/Update Story
-    saveStoryById: useCallback(async (config, story) => {
+    saveStoryById: useCallback(async (story) => {
       const payload = {
         storyId: story.storyId,
         title: story.title?.raw || 'Untitled',
@@ -148,7 +148,7 @@ export default function App() {
     }, []),
 
     // 3. Media listing
-    getMedia: useCallback(async (config, { mediaType, searchTerm, pagingNum }) => {
+    getMedia: useCallback(async ({ mediaType, searchTerm, pagingNum }) => {
       const sanitizedType = (mediaType === 'LOCAL_MEDIA_TYPE_ALL' || !mediaType) ? '' : mediaType;
       const query = new URLSearchParams({
         type: sanitizedType,
@@ -170,13 +170,13 @@ export default function App() {
     }, []),
 
     // 4. Upload media
-    uploadMedia: useCallback(async (config, file, additionalData) => {
+    uploadMedia: useCallback(async (file, additionalData) => {
       const formData = new FormData();
       formData.append('file', file);
       formData.append('additional_data', JSON.stringify({
         width: additionalData?.width || 1080,
         height: additionalData?.height || 1920,
-        altText: additionalData?.altText || file.name,
+        altText: additionalData?.altText || file?.name || 'media',
       }));
 
       const res = await fetch(`${API_BASE}/media`, {
@@ -190,7 +190,7 @@ export default function App() {
     }, []),
 
     // 5. Delete media
-    deleteMedia: useCallback(async (config, mediaId) => {
+    deleteMedia: useCallback(async (mediaId) => {
       const res = await fetch(`${API_BASE}/media/${mediaId}`, {
         method: 'DELETE',
       });
@@ -217,7 +217,7 @@ export default function App() {
         const file = e.target.files[0];
         if (file) {
           try {
-            const uploadedResource = await apiCallbacks.uploadMedia({}, file, {});
+            const uploadedResource = await apiCallbacks.uploadMedia(file, {});
             onSelect(uploadedResource);
             if (onClose) {
               onClose();
