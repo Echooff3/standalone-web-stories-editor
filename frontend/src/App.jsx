@@ -144,8 +144,9 @@ export default function App() {
 
     // 3. Media listing
     getMedia: useCallback(async (config, { mediaType, searchTerm, pagingNum }) => {
+      const sanitizedType = (mediaType === 'LOCAL_MEDIA_TYPE_ALL' || !mediaType) ? '' : mediaType;
       const query = new URLSearchParams({
-        type: mediaType || '',
+        type: sanitizedType,
         search: searchTerm || '',
         page: pagingNum || 1,
       });

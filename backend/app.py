@@ -204,13 +204,14 @@ def get_media(
     search: Optional[str] = Query(None),
     page: int = Query(1)
 ):
+    print(f"DEBUG: get_media called: type={type!r}, search={search!r}, page={page!r}")
     items = []
     try:
         entities = media_table_client.query_entities("PartitionKey eq 'media'")
         for entity in entities:
             # Simple manual filter for demo/local project
             mime_type = entity.get("mime_type", "")
-            if type and type not in mime_type:
+            if type and type != "LOCAL_MEDIA_TYPE_ALL" and type not in mime_type:
                 continue
             
             # Simple search filter
