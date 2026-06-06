@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { StoryEditor, InterfaceSkeleton } from '@googleforcreators/story-editor';
 import { elementTypes } from '@googleforcreators/element-library';
 import { registerElementType } from '@googleforcreators/elements';
+import { DATA_VERSION } from '@googleforcreators/migration';
 
 // Register element types for the story editor canvas
 elementTypes.forEach(registerElementType);
@@ -105,7 +106,10 @@ export default function App() {
         title: { raw: data.title },
         slug: data.slug,
         status: data.status,
-        storyData: data.storyData,
+        storyData: {
+          version: data.storyData?.version || DATA_VERSION,
+          ...data.storyData,
+        },
       };
     }, []),
 
@@ -117,6 +121,7 @@ export default function App() {
         slug: story.slug || story.storyId,
         status: story.status || 'draft',
         story_data: {
+          version: DATA_VERSION,
           pages: story.pages,
           fonts: story.fonts,
           autoAdvance: story.autoAdvance,
@@ -243,7 +248,10 @@ export default function App() {
             title: { raw: data.title },
             slug: data.slug,
             status: data.status,
-            storyData: data.storyData,
+            storyData: {
+              version: data.storyData?.version || DATA_VERSION,
+              ...data.storyData,
+            },
           }
         });
         setActiveStoryId(storyId);
@@ -268,7 +276,7 @@ export default function App() {
       title: newStoryTitle,
       slug,
       status: 'draft',
-      story_data: { pages: [], fonts: [] },
+      story_data: { pages: [], fonts: [], version: DATA_VERSION },
       content: '',
     };
 
